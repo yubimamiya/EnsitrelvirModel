@@ -1,0 +1,67 @@
+<DATAFILE>
+
+[FILEINFO]
+file={path='../../Downloads/Full cohort.csv'}
+delimiter = comma
+header={ID, time_day_, time_hr_, conc_ug_mL_, Geneder, Food, Amt_mg_}
+
+[CONTENT]
+ID = {use=identifier}
+time_day_ = {use=time}
+conc_ug_mL_ = {use=observation, type=continuous}
+Amt_mg_ = {use=amount}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {Vol_pop, omega_Vol, kCl_pop, omega_kCl, kLP_pop, omega_kLP, kPL_pop, omega_kPL, ka_pop, omega_ka}
+
+DEFINITION:
+Vol = {distribution=logNormal, typical=Vol_pop, sd=omega_Vol}
+kCl = {distribution=logNormal, typical=kCl_pop, sd=omega_kCl}
+kLP = {distribution=logNormal, typical=kLP_pop, sd=omega_kLP}
+kPL = {distribution=logNormal, typical=kPL_pop, sd=omega_kPL}
+ka = {distribution=logNormal, typical=ka_pop, sd=omega_ka}
+
+[LONGITUDINAL]
+input = {b}
+
+file = 'ENS_PK.txt'
+
+DEFINITION:
+conc_ug_mL_ = {distribution=normal, prediction=Cc, errorModel=proportional(b)}
+
+<FIT>
+data = 'conc_ug_mL_'
+model = conc_ug_mL_
+
+<PARAMETER>
+Vol_pop = {value=18023, method=MLE}
+b = {value=0.3, method=MLE}
+c = {value=1, method=FIXED}
+kCl_pop = {value=0.294, method=MLE}
+kLP_pop = {value=0.0375, method=MLE}
+kPL_pop = {value=0.0319, method=MLE}
+ka_pop = {value=24.56, method=MLE}
+omega_Vol = {value=1, method=MLE}
+omega_kCl = {value=1, method=MLE}
+omega_kLP = {value=1, method=MLE}
+omega_kPL = {value=1, method=MLE}
+omega_ka = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(method = StochasticApproximation)
+logLikelihood(method = ImportanceSampling)
+
+[PLOTS]
+run = true
+plots = {indfits = {selected = true}, parameterdistribution = {selected = true}, obspred = {selected = true}, covariancemodeldiagnosis = {selected = true}, covariatemodeldiagnosis = {selected = true}, vpc = {selected = true}, residualsscatter = {selected = true}, residualsdistribution = {selected = true}, randomeffects = {selected = true}, saemresults = {selected = true}}
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'Trial 16'
+
